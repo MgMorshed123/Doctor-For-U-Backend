@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 
 import cors from "cors";
 import { connectToMongoDB } from "./config/db.js";
+import adminRouter from "./routes/adminRoutes.js";
 dotenv.config();
 const app = express();
 // Define a port to run the server
@@ -18,6 +19,9 @@ app.get("/", (req, res) => {
 });
 
 connectToMongoDB();
+// api endpoint
+
+app.use("/api/admin", adminRouter);
 
 // Start the server
 app.listen(PORT, () => {
