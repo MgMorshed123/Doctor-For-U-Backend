@@ -12,5 +12,14 @@ export const AuthAdmin = async (req, res, next) => {
     }
 
     const token_decode = jwt.verify(atoken, process.env.jwt_Secret);
+
+    if (token_decode !== process.env.Admin_Email + process.env.Admin_Password) {
+      return res.json({
+        success: false,
+        message: "Not Authorized Login Again",
+      });
+    }
+
+    next();
   } catch (error) {}
 };
