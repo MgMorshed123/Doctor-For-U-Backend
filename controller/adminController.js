@@ -1,6 +1,10 @@
+import dotenv from "dotenv";
 import validator from "validator";
 import bcrypt from "bcrypt";
-import { v2 as cloudinary } from "cloudinary";
+import { doctorModel } from "../models/doctorModel.js";
+import cloudinary from "../config/cloudinary.js";
+
+dotenv.config();
 
 export const addDoctor = async (req, res, next) => {
   try {
@@ -16,9 +20,9 @@ export const addDoctor = async (req, res, next) => {
       address,
     } = req.body;
 
-    console.log(fees);
     const imageFile = req.file;
 
+    // Check for missing details
     if (
       !name ||
       !email ||
@@ -30,32 +34,74 @@ export const addDoctor = async (req, res, next) => {
       !fees ||
       !address
     ) {
-      return res.json({ success: false, message: "Missing Details " });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing Details" });
     }
 
-    if (!validator.isEmail) {
-      return res.json({
+    // Validate email
+    if (!validator.isEmail(email)) {
+      return res.status(400).json({
         success: false,
-        message: "Please Enter a Valid Email ",
+        message: "Please enter a valid email",
       });
     }
 
+    // Validate password length
     if (password.length < 8) {
-      return res.json({
+      return res.status(400).json({
         success: false,
-        message: "Please Enter a Strong Password ",
+        message: "Please enter a strong password (at least 8 characters)",
       });
     }
 
+    // Hash the password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
-      resource_type: "image",
-    });
+    // Upload image to Cloudinary
+    let imageUrl = "";
+    console.log(imageFile.path);
+    if (imageFile) {
+      try {
+        const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+          resource_type: "image",
+        });
+        imageUrl = imageUpload.secure_url;
+      } catch (error) {
+        return res.status(500).json({
+          success: false,
+          message: "Error uploading image to Cloudinary",
+          error: error.message,
+        });
+      }
+    }
 
-    const imageUrl = imageUpload.secure_url;
+    // Prepare doctor data
+    const doctorData = {
+      name,
+      email,
+      image: imageUrl,
+      password: hashedPassword,
+      speciality,
+      degree,
+      experience,
+      about,
+      fees,
+      address: JSON.parse(address),
+      date: new Date(),
+    };
 
-    // upload image to cloudinary
-  } catch (error) {}
+    // Save doctor to database
+    const newDoctor = new doctorModel(doctorData);
+    await newDoctor.save();
+
+    // Send success response
+    res
+      .status(201)
+      .json({ success: true, message: "Doctor added successfully" });
+  } catch (error) {
+    console.error("Error adding doctor:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
 };
