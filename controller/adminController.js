@@ -105,3 +105,11 @@ export const addDoctor = async (req, res, next) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const loginAdmin = async (req, res) => {
+  try {
+  } catch (error) {
+    console.error("Error adding doctor:", error);
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
