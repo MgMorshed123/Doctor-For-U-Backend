@@ -108,6 +108,17 @@ export const addDoctor = async (req, res, next) => {
 
 export const loginAdmin = async (req, res) => {
   try {
+    const { email, password } = req.body;
+
+    if (
+      email === process.env.Admin_Email &&
+      password === process.env.Admin_Password
+    ) {
+      const token = jwt.sign(email + password, process.env.jwt_Secret);
+      res.json({ success: true, token });
+    } else {
+      res.json({ success: false, message: "Invalid Credentials" });
+    }
   } catch (error) {
     console.error("Error adding doctor:", error);
     res.status(500).json({ success: false, message: error.message });
