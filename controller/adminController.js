@@ -3,6 +3,7 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 import { doctorModel } from "../models/doctorModel.js";
 import cloudinary from "../config/cloudinary.js";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 

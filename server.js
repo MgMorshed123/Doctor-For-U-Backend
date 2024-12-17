@@ -20,20 +20,6 @@ app.get("/", (req, res) => {
 
 connectDB();
 
-// api endpoint
-
-// app.use((req, res, next) => {
-//   res.setTimeout(15000, () => { // 15 seconds
-//     console.error("Request timed out");
-//     res.status(504).json({ success: false, message: "Request timed out" });
-//   });
-//   next();
-// });
-
-// console.log("Cloud Name:", process.env.CLOUD_NAME);
-// console.log("API Key:", process.env.API_KEY);
-// console.log("Secret Key:", process.env.API_SECRET);
-
 app.use("/api/admin", adminRouter);
 
 // Start the server
