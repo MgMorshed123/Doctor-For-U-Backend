@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import connectDB from "./config/db.js";
 import cors from "cors";
 import adminRouter from "./routes/adminRoutes.js";
+import doctorRouter from "./routes/doctorRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -16,7 +17,7 @@ app.use(express.json());
 // Configure CORS middleware
 app.use(
   cors({
-    origin: "http://localhost:5174", // Allow requests from your frontend's origin
+    origin: "*", // Allow requests from your frontend's origin
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed HTTP methods
     credentials: true, // Enable cookies and credentials sharing if required
   })
@@ -32,6 +33,7 @@ connectDB();
 
 // Admin routes
 app.use("/api/admin", adminRouter);
+app.use("/api/doctor", doctorRouter);
 
 // Start the server
 app.listen(PORT, () => {
