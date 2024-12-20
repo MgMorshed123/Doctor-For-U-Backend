@@ -125,3 +125,15 @@ export const loginAdmin = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+export const AllDoctor = async (req, res) => {};
+
+export const allDoctors = async (req, res) => {
+  try {
+    const doctors = await doctorModel.find({}).select("-password");
+
+    res.json({ success: false, doctors });
+  } catch (error) {
+    res.json({ success: false, message: error.message });
+  }
+};
