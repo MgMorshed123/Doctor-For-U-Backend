@@ -5,6 +5,7 @@ import connectDB from "./config/db.js";
 import cors from "cors";
 import adminRouter from "./routes/adminRoutes.js";
 import doctorRouter from "./routes/doctorRoutes.js";
+import userRouter from "./routes/userRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -34,6 +35,7 @@ connectDB();
 // Admin routes
 app.use("/api/admin", adminRouter);
 app.use("/api/doctor", doctorRouter);
+app.use("/api/user", userRouter);
 
 // Start the server
 app.listen(PORT, () => {
