@@ -80,20 +80,32 @@ export const getProfile = async (req, res) => {
 export const UpdateProfile = async (req, res) => {
   try {
     const { userId, name, phone, address, dob, gender } = req.body;
-
     const imageFile = req.file;
 
-    if (!name || !phone || !address || !dob || !gender) {
-      res.json({ success: fasle, message: "All Fields Required" });
+    // Check if required fields are missing
+    if (!name || !phone || !dob || !gender) {
+      return res.json({ success: false, message: "All Fields Required" });
     }
 
-    await userModel.findByIdAndUpdate(
-      userId,
-      { name, phone, address: JSON.parse(address) },
-      dob,
-      gende
-    );
+    let parsedAddress = address;
+    if (address && typeof address === "string") {
+      try {
+        parsedAddress = JSON.parse(address); // Only parse if address is a valid JSON string
+      } catch (err) {
+        return res.json({ success: false, message: "Invalid address format" });
+      }
+    }
 
+    // Update user profile with the new information
+    await userModel.findByIdAndUpdate(userId, {
+      name,
+      phone,
+      address: parsedAddress,
+      dob,
+      gender,
+    });
+
+    // Handle image upload if a file is provided
     if (imageFile) {
       const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
         resource_type: "image",
@@ -106,6 +118,7 @@ export const UpdateProfile = async (req, res) => {
 
     res.json({ success: true, message: "Profile Updated" });
   } catch (error) {
-    res.json({ success: fasle, message: error.message });
+    console.log(error);
+    res.json({ success: false, message: error.message });
   }
 };
