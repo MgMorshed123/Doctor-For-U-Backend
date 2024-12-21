@@ -2,6 +2,7 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 import { userModel } from "../models/userModel.js";
 import jwt from "jsonwebtoken";
+import { v2 as cloudinary } from "cloudinary";
 
 export const registerUser = async (req, res) => {
   try {
@@ -71,6 +72,39 @@ export const getProfile = async (req, res) => {
     const userData = await userModel.findById(userId).select("-password");
 
     res.json({ success: true, userData });
+  } catch (error) {
+    res.json({ success: fasle, message: error.message });
+  }
+};
+
+export const UpdateProfile = async (req, res) => {
+  try {
+    const { userId, name, phone, address, dob, gender } = req.body;
+
+    const imageFile = req.file;
+
+    if (!name || !phone || !address || !dob || !gender) {
+      res.json({ success: fasle, message: "All Fields Required" });
+    }
+
+    await userModel.findByIdAndUpdate(
+      userId,
+      { name, phone, address: JSON.parse(address) },
+      dob,
+      gende
+    );
+
+    if (imageFile) {
+      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+        resource_type: "image",
+      });
+
+      const imageUrl = imageUpload.secure_url;
+
+      await userModel.findByIdAndUpdate(userId, { image: imageUrl });
+    }
+
+    res.json({ success: true, message: "Profile Updated" });
   } catch (error) {
     res.json({ success: fasle, message: error.message });
   }
