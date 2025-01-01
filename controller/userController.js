@@ -185,10 +185,32 @@ export const listAppointment = async (req, res) => {
   try {
     const { userId } = req.body;
 
-    const appointment = await appointmentModel.findById(userId);
+    console.log(userId);
+
+    const appointment = await appointmentModel.find({ userId });
+
+    console.log(appointment);
 
     res.json({ success: true, appointment });
   } catch (error) {
     res.json({ success: false, message: error.message });
   }
+};
+
+export const cancelAppointment = async (req, res) => {
+  try {
+    const { userId, appointmentId } = req.body;
+
+    const appointmentData = await appointmentModel.findById(appointmentId);
+
+    if (appointmentData.userId !== userId) {
+      return res.json({ success: fasle, message: "UnAuthorized" });
+    }
+
+    await appointmentModel.findByIdAndUpdate(appointmentId, {
+      cancelled: true,
+    });
+
+    // making the slot  availabe again for that doctor after patient cancellation
+  } catch (error) {}
 };
