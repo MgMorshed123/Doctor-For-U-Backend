@@ -3,6 +3,8 @@ import bcrypt from "bcrypt";
 import { userModel } from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import { v2 as cloudinary } from "cloudinary";
+import { doctorModel } from "../models/doctorModel.js";
+import appointmentModel from "../models/appointmentModel.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -117,6 +119,60 @@ export const UpdateProfile = async (req, res) => {
     }
 
     res.json({ success: true, message: "Profile Updated" });
+  } catch (error) {
+    console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const bookAppointment = async (req, res) => {
+  try {
+    const { userId, docId, slotDate, slotTime } = req.body;
+
+    const docData = await doctorModel.findById(docId).select("-password");
+
+    if (!docData.available) {
+      return res.json({ success: false, message: "Doctor Not available " });
+    }
+
+    let slot_booked = docData.slot_booked;
+
+    if (slot_booked[slotDate]) {
+      if (slot_booked[slotDate].includes(slotTime)) {
+        return res.json({ success: false, message: "Slot Not Available" });
+      } else {
+        slot_booked[slotDate].push(slotTime);
+      }
+    } else {
+      slot_booked[slotDate] = [];
+      slot_booked[slotDate].push(slotTime);
+    }
+
+    const userData = await userModel.findById(userId).select("-passord");
+
+    // what happend if dont delete
+    delete docData.slot_booked;
+
+    const appointmentData = {
+      userId,
+      docId,
+      userData,
+      docData,
+      amount: docData.fees,
+      slotTime,
+      slotDate,
+      date: Date.now(),
+    };
+
+    const newAppointment = new appointmentModel(appointmentData);
+
+    await newAppointment.save();
+
+    // save slot data in doctor data .
+
+    await doctorModel.findByIdAndUpdate(docId, { slot_booked });
+
+    res.json({ success: true, message: "Appoint Booked " });
   } catch (error) {
     console.log(error);
     res.json({ success: false, message: error.message });
