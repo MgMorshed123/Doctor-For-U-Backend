@@ -185,11 +185,7 @@ export const listAppointment = async (req, res) => {
   try {
     const { userId } = req.body;
 
-    console.log(userId);
-
     const appointment = await appointmentModel.find({ userId });
-
-    console.log(appointment);
 
     res.json({ success: true, appointment });
   } catch (error) {
@@ -201,28 +197,52 @@ export const cancelAppointment = async (req, res) => {
   try {
     const { userId, appointmentId } = req.body;
 
+    console.log("appointmentId", appointmentId);
+
+    // Find the appointment
     const appointmentData = await appointmentModel.findById(appointmentId);
 
-    if (appointmentData.userId !== userId) {
-      return res.json({ success: fasle, message: "UnAuthorized" });
+    // Check if the appointment exists
+    if (!appointmentData) {
+      return res.json({ success: false, message: "Appointment not found" });
     }
 
+    // Authorization check
+    if (appointmentData.userId !== userId) {
+      return res.json({ success: false, message: "Unauthorized" });
+    }
+
+    // Mark appointment as cancelled
     await appointmentModel.findByIdAndUpdate(appointmentId, {
       cancelled: true,
     });
 
-    // making the slot  availabe again for that doctor after patient cancellation
-
+    // Retrieve doctor data
     const { docId, slotDate, slotTime } = appointmentData;
-
     const doctorData = await doctorModel.findById(docId);
 
-    let slot_booked = doctorData.slot_booked;
+    if (!doctorData) {
+      return res.json({ success: false, message: "Doctor not found" });
+    }
 
-    slot_booked[slotDate] = slot_booked[slotDate].filter((e) => e !== slotTime);
+    // Make the slot available again
+    let slot_booked = doctorData.slot_booked || {};
+    if (slot_booked[slotDate]) {
+      slot_booked[slotDate] = slot_booked[slotDate].filter(
+        (e) => e !== slotTime
+      );
+    }
 
-    await doctorData.findByIdAndUpdate(docId, { slot_booked });
+    // Update the doctor data
+    await doctorModel.findByIdAndUpdate(docId, { slot_booked });
 
-    res.json({ success: true, message: "Appointment booked Cancelled " });
-  } catch (error) {}
+    // Send success response
+    res.json({ success: true, message: "Appointment successfully cancelled" });
+  } catch (error) {
+    console.error(error);
+    res.json({
+      success: false,
+      message: "An error occurred while cancelling the appointment",
+    });
+  }
 };
