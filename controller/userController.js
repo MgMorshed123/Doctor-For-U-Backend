@@ -212,5 +212,17 @@ export const cancelAppointment = async (req, res) => {
     });
 
     // making the slot  availabe again for that doctor after patient cancellation
+
+    const { docId, slotDate, slotTime } = appointmentData;
+
+    const doctorData = await doctorModel.findById(docId);
+
+    let slot_booked = doctorData.slot_booked;
+
+    slot_booked[slotDate] = slot_booked[slotDate].filter((e) => e !== slotTime);
+
+    await doctorData.findByIdAndUpdate(docId, { slot_booked });
+
+    res.json({ success: true, message: "Appointment booked Cancelled " });
   } catch (error) {}
 };
