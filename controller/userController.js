@@ -129,6 +129,8 @@ export const bookAppointment = async (req, res) => {
   try {
     const { userId, docId, slotDate, slotTime } = req.body;
 
+    console.log("slotDate, slotTime", slotDate, slotTime);
+
     const docData = await doctorModel.findById(docId).select("-password");
 
     if (!docData.available) {
@@ -175,6 +177,18 @@ export const bookAppointment = async (req, res) => {
     res.json({ success: true, message: "Appoint Booked " });
   } catch (error) {
     console.log(error);
+    res.json({ success: false, message: error.message });
+  }
+};
+
+export const listAppointment = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    const appointment = await appointmentModel.findById(userId);
+
+    res.json({ success: true, appointment });
+  } catch (error) {
     res.json({ success: false, message: error.message });
   }
 };
