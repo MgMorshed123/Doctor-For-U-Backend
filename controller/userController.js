@@ -6,6 +6,9 @@ import { v2 as cloudinary } from "cloudinary";
 import { doctorModel } from "../models/doctorModel.js";
 import appointmentModel from "../models/appointmentModel.js";
 import razorpay from "razorpay";
+import Stripe from "stripe";
+const stripe = new Stripe(process.env.stripe);
+// Replace with your Stripe secret key
 
 export const registerUser = async (req, res) => {
   try {
@@ -65,6 +68,7 @@ export const loginUser = async (req, res) => {
     }
   } catch (error) {
     res.json({ success: false, message: error.message });
+    console.log(error);
   }
 };
 
@@ -130,7 +134,7 @@ export const bookAppointment = async (req, res) => {
   try {
     const { userId, docId, slotDate, slotTime } = req.body;
 
-    console.log("slotDate, slotTime", slotDate, slotTime);
+    // console.log("slotDate, slotTime", slotDate, slotTime);
 
     const docData = await doctorModel.findById(docId).select("-password");
 
@@ -177,7 +181,7 @@ export const bookAppointment = async (req, res) => {
 
     res.json({ success: true, message: "Appoint Booked " });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     res.json({ success: false, message: error.message });
   }
 };
@@ -186,7 +190,10 @@ export const listAppointment = async (req, res) => {
   try {
     const { userId } = req.body;
 
+    // console.log(userId);
     const appointment = await appointmentModel.find({ userId });
+
+    // console.log(appointment);
 
     res.json({ success: true, appointment });
   } catch (error) {
@@ -198,7 +205,7 @@ export const cancelAppointment = async (req, res) => {
   try {
     const { userId, appointmentId } = req.body;
 
-    console.log("appointmentId", appointmentId);
+    // console.log("appointmentId", appointmentId);
 
     // Find the appointment
     const appointmentData = await appointmentModel.findById(appointmentId);
@@ -240,7 +247,7 @@ export const cancelAppointment = async (req, res) => {
     // Send success response
     res.json({ success: true, message: "Appointment successfully cancelled" });
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     res.json({
       success: false,
       message: "An error occurred while cancelling the appointment",
@@ -248,17 +255,71 @@ export const cancelAppointment = async (req, res) => {
   }
 };
 
-// payment-api
+// Initialize Stripe with your secret key
 
-const paymentApi = async (req, res, next) => {
-  const { appointmentId } = req.body;
+// Initialize Stripe with your secret key
 
-  const appointmentData = await appointmentModel.findById(appointmentId);
+export const paymentApi = async (req, res) => {
+  try {
+    const { appointmentId } = req.body;
 
-  if (!appointmentData || appointmentData.cancelled) {
-    return res.json({
+    // Fetch appointment details from the database
+    const appointmentData = await appointmentModel.findById(appointmentId);
+
+    if (!appointmentData) {
+      return res.status(404).json({
+        success: false,
+        message: "Appointment not found",
+      });
+    }
+
+    if (appointmentData.cancelled) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointment is cancelled",
+      });
+    }
+
+    // Calculate the payment amount (in paise for INR)
+    const paymentAmount = appointmentData.amount * 100;
+
+    // Create a Stripe Checkout Session
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "INR",
+            product_data: {
+              name: "Appointment Payment",
+            },
+            unit_amount: paymentAmount,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      success_url: `${process.env.FRONTEND_URL}/my-appointments`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+    });
+
+    // Update the payment field to true and save the updated appointment to the database
+    appointmentData.payment = true;
+    await appointmentData.save();
+
+    // Respond with the session URL
+    res.status(200).json({
+      appointmentData: appointmentData,
+      success: true,
+      paymentUrl: session.url,
+    });
+  } catch (error) {
+    console.error("Error creating payment session:", error.message);
+
+    res.status(500).json({
       success: false,
-      message: "Appointment cancelled or not found",
+      message: "Failed to create payment session",
+      error: error.message,
     });
   }
 };

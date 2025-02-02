@@ -9,7 +9,7 @@ const appointmentSchema = new mongoose.Schema({
   docData: { type: Object, required: true }, // Add more specific validations if needed
   date: { type: Number, required: true }, // Unix timestamp or other numeric date representation
   amount: { type: Number, required: true },
-  cancelled: { type: Number, default: 0 }, // Default value to indicate not cancelled
+  cancelled: { type: Boolean, default: false }, // Default value to indicate not cancelled
   payment: { type: Boolean, default: false },
   isCompleted: { type: Boolean, default: false },
 });
