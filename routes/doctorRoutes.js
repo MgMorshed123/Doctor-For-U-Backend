@@ -9,8 +9,9 @@ import {
   loginDoctor,
   UpdatedoctorProfile,
 } from "../controller/doctorController.js";
-import { AuthDoctor } from "../middlewares/authDoctor.js";
+// import { AuthDoctor } from "../middlewares/authDoctor.js";
 import { UpdateProfile } from "../controller/userController.js";
+import { AuthDoctor } from "../middlewares/AuthDoctor.js";
 
 const doctorRouter = express.Router();
 
