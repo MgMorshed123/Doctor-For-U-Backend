@@ -44,7 +44,7 @@ export const loginDoctor = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = jwt.sign({ id: doctor._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: doctor._id }, process.env.jwt_Secret);
     res.json({ success: true, token });
   } catch (error) {
     console.error(error);
