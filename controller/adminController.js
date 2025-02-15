@@ -43,7 +43,7 @@ export const addDoctor = async (req, res, next) => {
         .status(400)
         .json({ success: false, message: "Missing Details" });
     }
-
+    // cahge
     // Validate email
     if (!validator.isEmail(email)) {
       return res.status(400).json({

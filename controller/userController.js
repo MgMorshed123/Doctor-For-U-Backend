@@ -299,8 +299,16 @@ export const paymentApi = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.FRONTEND_URL}/my-appointments`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+      success_url: `${
+        process.env.FRONTEND_URL?.startsWith("http")
+          ? process.env.FRONTEND_URL
+          : `https://${process.env.FRONTEND_URL}`
+      }/my-appointments`,
+      cancel_url: `${
+        process.env.FRONTEND_URL?.startsWith("http")
+          ? process.env.FRONTEND_URL
+          : `https://${process.env.FRONTEND_URL}`
+      }/cancel`,
     });
 
     // Update the payment field to true and save the updated appointment to the database
