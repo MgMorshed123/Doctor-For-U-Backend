@@ -31,7 +31,9 @@ export const doctorList = async (req, res) => {
 
 export const loginDoctor = async (req, res) => {
   try {
-    const doctor = await Doctor.findOne({ email: req.body.email });
+    const doctor = await doctorModel.findOne({ email: req.body.email });
+
+    console.log(doctor);
     if (!doctor) {
       return res.status(400).json({ message: "Doctor not found" });
     }
