@@ -31,13 +31,15 @@ export const doctorList = async (req, res) => {
 
 export const loginDoctor = async (req, res) => {
   try {
+    console.log(req.body.email);
     const doctor = await doctorModel.findOne({ email: req.body.email });
 
-    console.log(doctor);
+    console.log("doctor", doctor);
     if (!doctor) {
       return res.status(400).json({ message: "Doctor not found" });
     }
     const isMatch = await bcrypt.compare(req.body.password, doctor.password);
+    console.log(isMatch);
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
