@@ -31,46 +31,20 @@ export const doctorList = async (req, res) => {
 
 export const loginDoctor = async (req, res) => {
   try {
-    const { email, password } = req.body;
-
-    // Check if doctor exists
-    const doctor = await doctorModel.findOne({ email });
-
+    const doctor = await Doctor.findOne({ email: req.body.email });
     if (!doctor) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+      return res.status(400).json({ message: "Doctor not found" });
     }
-
-    // Compare password
-    const isMatch = await bcrypt.compare(password, doctor.password);
-
+    const isMatch = await bcrypt.compare(req.body.password, doctor.password);
     if (!isMatch) {
-      return res
-        .status(401)
-        .json({ success: false, message: "Invalid credentials" });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Generate JWT token
-    const token = jwt.sign({ id: doctor._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d", // Token expiration
-    });
-
-    // Send success response
-    res.status(200).json({
-      success: true,
-      message: "Login successful",
-      token,
-      doctor: {
-        id: doctor._id,
-        name: doctor.name,
-        email: doctor.email,
-      },
-    });
+    const token = jwt.sign({ id: doctor._id }, process.env.JWT_SECRET);
+    res.json({ success: true, token });
   } catch (error) {
-    res
-      .status(500)
-      .json({ success: false, message: "Server error", error: error.message });
+    console.error(error);
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
 
