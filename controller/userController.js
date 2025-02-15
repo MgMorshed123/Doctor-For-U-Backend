@@ -299,8 +299,8 @@ export const paymentApi = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.FRONTEND_URL}/my-appointments`,
-      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
+      success_url: `https://doctors-portal-gokj.onrender.com/my-appointments`,
+      cancel_url: `https://doctors-portal-gokj.onrender.com/cancel`,
     });
 
     console.log(process.env.FRONTEND_URL);
