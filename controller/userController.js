@@ -289,7 +289,7 @@ export const paymentApi = async (req, res) => {
       line_items: [
         {
           price_data: {
-            currency: "INR",
+            currency: "USD",
             product_data: {
               name: "Appointment Payment",
             },
