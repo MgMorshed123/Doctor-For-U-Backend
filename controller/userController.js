@@ -301,8 +301,8 @@ export const paymentApi = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `https://doctors-portal-gokj.onrender.com/my-appointments`,
-      cancel_url: `https://doctors-portal-gokj.onrender.com/cancel`,
+      success_url: `${process.env.FRONTEND_URL}/my-appointments`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     });
 
     // Update the payment field to true and save the updated appointment to the database
@@ -313,7 +313,6 @@ export const paymentApi = async (req, res) => {
     // console.log("appointmentData", appointmentData);
 
     // Send confirmation email
-    await sendAppointmentConfirmationEmail(appointmentData);
 
     // Respond with the session URL
     res.status(200).json({
@@ -321,6 +320,7 @@ export const paymentApi = async (req, res) => {
       success: true,
       paymentUrl: session.url,
     });
+    await sendAppointmentConfirmationEmail(appointmentData);
   } catch (error) {
     console.error("Error creating payment session:", error.message);
 

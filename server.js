@@ -17,13 +17,12 @@ const PORT = 4000;
 app.use(express.json());
 
 // Configure CORS middleware
-app.use(
-  cors({
-    origin: "*", // Allow requests from your frontend's origin
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Allowed HTTP methods
-    credentials: true, // Enable cookies and credentials sharing if required
-  })
-);
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://doctors-portal-gokj.onrender.com",
+];
+
+app.use(cors());
 
 // Basic route
 app.get("/", (req, res) => {
