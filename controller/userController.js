@@ -301,7 +301,7 @@ export const paymentApi = async (req, res) => {
         },
       ],
       mode: "payment",
-      success_url: `${process.env.FRONTEND_URL}/my-appointments`,
+      success_url: `${process.env.FRONTEND_URL}/success`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     });
 
